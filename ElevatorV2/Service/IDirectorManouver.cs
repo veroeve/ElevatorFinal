@@ -7,9 +7,9 @@ using System.Windows.Controls;
 
 namespace ElevatorV2.Service
 {
-    public interface IControllerManouver
+    public interface IDirectorManouver
     {
-        bool RegisterRequest(int numberFloor, string typeRequest);
-        void ExecuteRequest(List<Floor> lisFloor);
+        void RegisterCall(int numberFloor, string typeRequest);
+        void ExecuteCalls(List<Floor> lisFloor);
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Services.Enums
 {
-    enum TypeRequest
+    enum Direction
     {
         up,
         down

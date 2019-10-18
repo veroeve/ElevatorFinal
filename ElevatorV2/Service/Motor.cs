@@ -14,29 +14,28 @@ namespace ElevatorV2.Service
         {
             _text = text;
         }
-        public void MotorDown()
+        public int MotorDown(int currentheight)
         {
-           
+            currentheight--;
             _text.AppendText("Motor Down \r\n");
+            return currentheight;
         }
 
-        public void MotorUp()
+        public int MotorUp(int currentheight)
         {
-          
+            currentheight++;
             _text.AppendText("Motor Up \r\n");
+            return currentheight;
         }
 
-        public void Notify(string state)
+        public void Notify(string numberFloor)
         {
-            if (state == "Active")
-            {
-                Stop();
-            }
+            Stop(numberFloor);
         }
 
-        public void Stop()
+        public void Stop(string numberFloor)
         {
-            _text.AppendText("Motor Stop \r\n");
+            _text.AppendText($"Motor Stopped on the floor:{numberFloor} \r\n");
         }
     }
 }

@@ -8,8 +8,8 @@ namespace ElevatorV2.Service
 {
     interface IMotor
     {
-        void MotorUp();
-        void MotorDown();
-        void Stop();
+        int MotorUp(int currentheight);
+        int MotorDown(int currentheight);
+        void Stop(string numberFloor);
     }
 }

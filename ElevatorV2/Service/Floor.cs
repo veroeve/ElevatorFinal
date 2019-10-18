@@ -32,6 +32,11 @@ namespace ElevatorV2.Service
             _number = number;
             _height = height;
             _typeFloor = typeFloor;
+
+        }
+        public Floor()
+        {
+
         }
         public int sendNumber(int height)
         {

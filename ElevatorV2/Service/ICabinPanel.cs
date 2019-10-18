@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace ElevatorV2.Service
 {
-    interface IDoor
+    public interface ICabinPanel:IPanelButton
     {
-        void Close();
-        void Open(string numberFloor);
-        bool GetState();
+        void TurnOffCabinButtonForFloor(string numberfloor);
     }
 }

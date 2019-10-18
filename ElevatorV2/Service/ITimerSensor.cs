@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace ElevatorV2.Service
 {
-    interface IDoor
+    interface ITimerSensor
     {
-        void Close();
-        void Open(string numberFloor);
-        bool GetState();
+        void Star(IElevator elevator);
+        void Stop();
     }
 }

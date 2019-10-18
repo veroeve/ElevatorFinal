@@ -16,6 +16,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Services.Enums;
+using System.Configuration;
 
 namespace ElevatorV2
 {
@@ -25,106 +26,117 @@ namespace ElevatorV2
     public partial class MainWindow : Window
     {
         IElevator _elevator;
+        ITimerSensor _timeSensor= new TimerSensor();
+        Dictionary<string, Button> _dictionaryFloorButton = new Dictionary<string, Button>();
+        Dictionary<string, Button> _dictionaryCabinButton = new Dictionary<string, Button>();
         public MainWindow()
         {
             InitializeComponent();
-            #region Parameter Initialization
-            cmbFloor.Items.Add("0");
-            cmbFloor.Items.Add("1");
-            cmbFloor.Items.Add("2");
-            cmbFloor.Items.Add("3");
-
+            CreateCabinButton();
+            CreateFloorButton();
             txtElevator.AppendText("Start \r\n");
-            List<Floor> ltFloor = new List<Floor>();
-            var floorA = new Floor(0, 0, TypeFloor.floorup.ToString());
-            var floorB = new Floor(1, 3,TypeFloor.floorboth.ToString());
-            var floorC = new Floor(2, 6,TypeFloor.floorboth.ToString());
-            var floorD = new Floor(3, 9, TypeFloor.floordown.ToString());
-            var floorE= new Floor(4, 12, TypeFloor.floorboth.ToString());
 
-            ltFloor.Add(floorA);
-            ltFloor.Add(floorB);
-            ltFloor.Add(floorC);
-            ltFloor.Add(floorD);
-            ltFloor.Add(floorE);
-
-            IButton _button = new Buttons();
-            _button.AddFloorButtons("up", btnUp);
-            _button.AddFloorButtons("down", btnDown);
-            _button.AddCabinButtons("0", btn0);
-            _button.AddCabinButtons("1", btn1);
-            _button.AddCabinButtons("2", btn2);
-            _button.AddCabinButtons("3", btn3);
-            #endregion
-
-            _elevator = new Elevator(txtElevator, _button, new ControllerManouver(txtElevator, _button, lblDisplayCabin, lblDisplayFloor), ltFloor);
+            _elevator = new Elevator(txtElevator, lblDisplayFloor, lblDisplayCabin, _dictionaryFloorButton, _dictionaryCabinButton);
+            CreateFloor();
 
             btnDown.Visibility = Visibility.Hidden;
             lblDisplayCabin.Content = "0";
             lblDisplayFloor.Content = "0";
 
-            DispatcherTimer dispathcer = new DispatcherTimer();
-            dispathcer.Interval = new TimeSpan(0, 0, 3);
-            dispathcer.Tick += (s, a) =>
-            {
-                _elevator.Execute();
-            };
-            dispathcer.Start();
-
+            _timeSensor.Star(_elevator);
+            cmbFloor.SelectionChanged += selection;
+           
         }
+
+        private void selection(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbFloor.SelectedValue == null)
+            {
+                MessageBox.Show($"Select a floor");
+                return;
+            }
+            else
+            {
+                int floor =(int) cmbFloor.SelectedValue;
+                _elevator.ChangeButtonFor(floor);
+                
+            }
+        }
+
+        public void CreateFloor()
+        {
+            var floorQuantity = int.Parse(ConfigurationSettings.AppSettings["floorQuantity"]);
+            for (int i = 0; i < floorQuantity; i++)
+            {
+                string key = "Floor" + i;
+                string type = TypeFloor.floorboth.ToString();
+
+                // Do: Fill combobox
+                cmbFloor.Items.Add(i);
+                // Do: Create virtual floors                
+                if (i==0)
+                {
+                    type = TypeFloor.floorup.ToString();
+                }
+                if(i==floorQuantity-1)
+                {
+                    type = TypeFloor.floordown.ToString();
+                }
+                if (ConfigurationSettings.AppSettings[key] != null)
+                {
+                    _elevator.CreateFloor(i, Int32.Parse(ConfigurationSettings.AppSettings[key]), type);
+                }
+            }
+        }
+        public void CreateFloorButton()
+        {
+            _dictionaryFloorButton.Add(Direction.up.ToString(), btnUp);
+            _dictionaryFloorButton.Add(Direction.down.ToString(), btnDown);
+        }
+        public void CreateCabinButton()
+        {
+            var floorQuantity = int.Parse(ConfigurationSettings.AppSettings["floorQuantity"]);
+            for (int i = 0; i < floorQuantity; i++)
+            {
+                var btn = new Button();
+                btn.Content = "Floor " + i;
+                btn.Tag = i;
+                btn.Click += btn0_Click;
+                btn.Height = 39;
+                if (i % 2 == 0)
+                {
+                    pnlOdd.Children.Add(btn);
+                }
+                else
+                {
+                    pnlEven.Children.Add(btn);
+                }
+                _dictionaryCabinButton.Add(i.ToString(), btn);
+            }
+           
+        }
+
 
         private void btnUp_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                int numberFloor = Int32.Parse(cmbFloor.SelectedValue.ToString());
-                _elevator.SendRequest(numberFloor, "up");
-            }
-            catch
+            var buttonClicked = sender as Button;
+
+            if (cmbFloor.SelectedValue == null)
             {
                 MessageBox.Show($"Select a floor");
+                return;
             }
-        }
 
-        private void btnDown_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                int numberFloor = Int32.Parse(cmbFloor.SelectedValue.ToString());
-                _elevator.SendRequest(numberFloor, "down");
-            }
-            catch
-            {
-                MessageBox.Show($"Select a floor");
-            }
+            var numberFloor = (int)cmbFloor.SelectedValue;
+            _elevator.RegisterCall(numberFloor, buttonClicked.Tag.ToString());
         }
-
         private void btn0_Click(object sender, RoutedEventArgs e)
         {
-            btn0.Background = Brushes.Red;
-            txtElevator.AppendText("Floor request 0 \r\n");
-            _elevator.SendRequest(0, "");
+            var buttonClicked = sender as Button;
+            buttonClicked.Background = Brushes.Red;
+            txtElevator.AppendText($"Floor request {buttonClicked.Tag.ToString()} \r\n");
+            _elevator.RegisterCall(int.Parse(buttonClicked.Tag.ToString()), string.Empty);
         }
 
-        private void btn1_Click(object sender, RoutedEventArgs e)
-        {
-            btn1.Background = Brushes.Red;
-            txtElevator.AppendText("Floor request 1 \r\n");
-            _elevator.SendRequest(1, "");
-        }
-
-        private void btn2_Click(object sender, RoutedEventArgs e)
-        {
-            btn2.Background = Brushes.Red;
-            txtElevator.AppendText("Floor request 2 \r\n");
-            _elevator.SendRequest(2, "");
-        }
-
-        private void btn3_Click(object sender, RoutedEventArgs e)
-        {
-            btn3.Background = Brushes.Red;
-            txtElevator.AppendText("Floor request 3 \r\n");
-            _elevator.SendRequest(3, "");
-        }
     }
 }

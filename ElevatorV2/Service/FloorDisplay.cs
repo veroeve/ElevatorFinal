@@ -9,20 +9,18 @@ using System.Windows.Controls;
 namespace ElevatorV2.Service
 {
    
-    public class Display : IDisplay
+    public class FloorDisplay : IFloorDisplay 
     {
-        Label _lblCabinDisplay;
         Label _lblFloorDisplay;
-        public Display(Label labelcabin, Label labelFloor)
+        public FloorDisplay( Label labelFloor)
         {
-            _lblCabinDisplay = labelcabin;
             _lblFloorDisplay = labelFloor;
         }
+
         public void ShowFloor(int numberFloor)
         {
-            _lblCabinDisplay.Content=numberFloor.ToString();
-            _lblFloorDisplay.Content = numberFloor.ToString();
-            
+            _lblFloorDisplay.Content = numberFloor.ToString();            
         }
+      
     }
 }

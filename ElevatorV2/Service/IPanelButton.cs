@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace ElevatorV2.Service
 {
-    interface IDoor
+    public interface IPanelButton
     {
-        void Close();
-        void Open(string numberFloor);
-        bool GetState();
+        void CreateButton(string name, Button button);
     }
 }

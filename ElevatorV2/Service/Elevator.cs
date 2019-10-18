@@ -9,35 +9,60 @@ namespace ElevatorV2.Service
 {
     public class Elevator : IElevator
     {
-        IControllerManouver _controller;
-        IButton _button;
-        List<Floor> _ltFloor;
+        IDirectorManouver _Director;
+        IFloorPanel _floorPanel= new FloorPanel();
+        ICabinPanel _cabinPanel = new CabinPanel();       
+        IFloorDisplay _floorDisplay;
+        ICabinDisplay _cabinDisplay;
+        IMotor _motor;
+        IDoor _floorDoor;
+        IDoor _cabinDoor;        
+        List<Floor> _ltFloor= new List<Floor>();
         TextBox _txtElevator;
-        public Elevator(TextBox text, IButton button, IControllerManouver controller, List<Floor> ltFloor)
+        public Elevator(TextBox text, Label displayFloor, Label displayCabin, Dictionary<string, Button> dictionaryFloorButton, Dictionary<string, Button> dictionaryCabinButton)
         {
             _txtElevator = text;
-            _controller = controller;
-            _ltFloor = ltFloor;
-            _button = button;
+            _floorDoor = new FloorDoor(_txtElevator);
+            _cabinDoor = new CabinDoor(_txtElevator);
+            _motor = new Motor(_txtElevator);
+            _floorDisplay = new FloorDisplay(displayFloor);
+            _cabinDisplay = new CabinDisplay(displayCabin);
+            foreach (var item in dictionaryCabinButton)
+            {
+                _cabinPanel.CreateButton(item.Key, item.Value);
+            }
+            foreach (var item in dictionaryFloorButton)
+            {
+                _floorPanel.CreateButton(item.Key, item.Value);
+            }
+            _Director = new DirectorManouver(_txtElevator, _floorPanel, _cabinPanel,_floorDisplay,_cabinDisplay,_motor,_floorDoor,_cabinDoor);
         }
-        public void SendRequest(int numberFloor, string typeRequest)
+        public void RegisterCall(int numberFloor, string typeCall)
         {
-           var numError= _controller.RegisterRequest(numberFloor, typeRequest);
-            if(numError)
-            {
-                _txtElevator.AppendText("Reject request \r\n");
-            }
-            else
-               
-            {
-                _txtElevator.AppendText("Request accepted \r\n");
-            }
+            _Director.RegisterCall(numberFloor, typeCall);         
             
         }
 
-        public void Execute()
+        public void ExecuteCalls()
         {
-            _controller.ExecuteRequest(_ltFloor);
+            _Director.ExecuteCalls(_ltFloor);
+        }
+
+        public void CreateFloor(int number, int height, string typeFloor)
+        {
+            _ltFloor.Add(new Floor(number, height, typeFloor));
+        }
+ 
+        public void ChangeButtonFor(int floor)
+        {            
+            foreach(var item in _ltFloor)
+            {
+                if(item.Number == floor)
+                {
+                    _floorPanel.EnableFloorButton(item.TypeFloor);
+                }
+            }
+
         }
     }
 }

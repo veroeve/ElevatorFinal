@@ -55,24 +55,41 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Service\Buttons.cs" />
-    <Compile Include="Service\ControllerManouver.cs" />
-    <Compile Include="Service\Display.cs" />
-    <Compile Include="Service\Door.cs" />
+    <Compile Include="Service\CabinButton.cs" />
+    <Compile Include="Service\CabinDisplay.cs" />
+    <Compile Include="Service\CabinPanel.cs" />
+    <Compile Include="Service\CabinSensor.cs" />
+    <Compile Include="Service\CallControl.cs" />
+    <Compile Include="Service\DirectorManouver.cs" />
+    <Compile Include="Service\FloorDisplay.cs" />
+    <Compile Include="Service\CabinDoor.cs" />
     <Compile Include="Service\Elevator.cs" />
     <Compile Include="Service\Floor.cs" />
-    <Compile Include="Service\IButton.cs" />
-    <Compile Include="Service\IControllerManouver.cs" />
+    <Compile Include="Service\FloorButton.cs" />
+    <Compile Include="Service\FloorDoor.cs" />
+    <Compile Include="Service\FloorPanel.cs" />
+    <Compile Include="Service\ICabinButton.cs" />
+    <Compile Include="Service\ICabinDisplay.cs" />
+    <Compile Include="Service\ICabinPanel.cs" />
+    <Compile Include="Service\ICabinSensor.cs" />
+    <Compile Include="Service\ICallControl.cs" />
+    <Compile Include="Service\IDirectorManouver.cs" />
     <Compile Include="Service\IDisplay.cs" />
     <Compile Include="Service\IDoor.cs" />
     <Compile Include="Service\IElevator.cs" />
     <Compile Include="Service\IFloor.cs" />
+    <Compile Include="Service\IFloorButton.cs" />
+    <Compile Include="Service\IFloorDisplay.cs" />
+    <Compile Include="Service\IFloorPanel.cs" />
     <Compile Include="Service\ILevelSensor.cs" />
     <Compile Include="Service\IMotor.cs" />
     <Compile Include="Service\IObserver.cs" />
+    <Compile Include="Service\IPanelButton.cs" />
+    <Compile Include="Service\ITimerSensor.cs" />
     <Compile Include="Service\LevelSensor.cs" />
     <Compile Include="Service\Motor.cs" />
     <Compile Include="Service\Request.cs" />
+    <Compile Include="Service\TimerSensor.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

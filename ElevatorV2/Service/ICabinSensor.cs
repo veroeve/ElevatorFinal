@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace ElevatorV2.Service
 {
-    interface IDoor
+    interface ICabinSensor
     {
-        void Close();
-        void Open(string numberFloor);
-        bool GetState();
+        bool IsOnTheNextFloor(List<Floor> ltFloor, int currentFloor, int currentHeight, string ElevatorDirection);
+
+
     }
 }
