@@ -22,8 +22,8 @@ namespace ElevatorV2.Service
         ILevelSensor _levelSensor;
         ICabinSensor _cabinSensor;
         ITimerSensor _timer = new TimerSensor();
-        string _currentDirection;
-        int _currentFloor = 0;
+        Direction _currentDirection=Direction.none;
+        int _elevatorCurrentFloor = 0;
         int _currentHeight = 0;
         TextBox _txtElevator;
         bool _isOpen;
@@ -42,16 +42,22 @@ namespace ElevatorV2.Service
             _cabinSensor = new CabinSensor();
         }
 
-        public void RegisterCall(int numberFloor, string typeCall)
+        public void RegisterCall(int numberFloor, Direction typeRequest)
         {
-            if (_currentDirection==null)
-            {
-                _currentDirection = typeCall;
-            }
-            _callControl.RegisterCall(numberFloor, typeCall);
+            EnsureCurrentDirection(typeRequest);
+            _callControl.RegisterRequest(numberFloor, typeRequest);
             _txtElevator.AppendText($"Order accepted to go to floor{numberFloor}\r\n");
 
         }
+
+        private void EnsureCurrentDirection(Direction typeRequest)
+        {
+            if (_currentDirection == Direction.none)
+            {
+                _currentDirection = typeRequest;
+            }
+        }
+
         public void ExecuteCalls(List<Floor> ltFloor)
         {
             if(_isOpen)
@@ -60,7 +66,7 @@ namespace ElevatorV2.Service
                 _floorDoor.Close();
                 _isOpen = false;
             }
-            if (_callControl.CallIsFull())
+            if (_callControl.HasAnyRequest())
             {
                 _levelSensor = new LevelSensor();
                 IObserver motorObserver = new Motor(_txtElevator);
@@ -70,28 +76,28 @@ namespace ElevatorV2.Service
                 _levelSensor.stateChange += new Notify(cabinObserver.Notify);
                 _levelSensor.stateChange += new Notify(floorObserver.Notify);
 
-                string direction = _callControl.UpdateCallAndDirection(_currentDirection, _currentFloor);
+                Direction direction = _callControl.UpdateRequestAndDirection(_currentDirection, _elevatorCurrentFloor);
                 if(_currentDirection!=direction)
                 {
                     _currentDirection = direction;
                     UpdateCurrentHeight(ltFloor);
                 }
-                if (_currentDirection == Direction.up.ToString())
+                if (_currentDirection == Direction.up)
                 {
                     _currentHeight = _motor.MotorUp(_currentHeight);
                 }
-                if (_currentDirection == Direction.down.ToString())
+                if (_currentDirection == Direction.down)
                 {
                     _currentHeight = _motor.MotorDown(_currentHeight);
                 }
-                if(_cabinSensor.IsOnTheNextFloor(ltFloor,_currentFloor,_currentHeight,_currentDirection))
+                if(_cabinSensor.IsOnTheNextFloor(ltFloor,_elevatorCurrentFloor,_currentHeight,_currentDirection))
                 {
                     UpdateCurrentFloor();
                     UpdateCurrentHeight(ltFloor);
-                    _floorDisplay.ShowFloor(_currentFloor);
-                    _cabinDisplay.ShowFloor(_currentFloor);
-                    _cabinPanel.TurnOffCabinButtonForFloor(_currentFloor.ToString());
-                   _isOpen= _callControl.FloorMakeCall(_currentFloor, _currentDirection, _levelSensor);
+                    _floorDisplay.ShowFloor(_elevatorCurrentFloor);
+                    _cabinDisplay.ShowFloor(_elevatorCurrentFloor);
+                    _cabinPanel.TurnOffCabinButtonForFloor(_elevatorCurrentFloor.ToString());
+                   _isOpen= _callControl.FloorMakeCall(_elevatorCurrentFloor, _currentDirection, _levelSensor);
                    
                 }     
             }
@@ -99,27 +105,27 @@ namespace ElevatorV2.Service
 
         private void UpdateCurrentFloor()
         {
-            if (_currentDirection == Direction.up.ToString())
+            if (_currentDirection == Direction.up)
             {
-                _currentFloor = _currentFloor + 1;
+                _elevatorCurrentFloor = _elevatorCurrentFloor + 1;
             }
-            if (_currentDirection == Direction.down.ToString())
+            if (_currentDirection == Direction.down)
             {
-                _currentFloor = _currentFloor - 1;
+                _elevatorCurrentFloor = _elevatorCurrentFloor - 1;
             }
 
         }
         private void UpdateCurrentHeight(List<Floor> ltFloor)
         {
-            if (_currentDirection == Direction.up.ToString())
+            if (_currentDirection == Direction.up)
             {
                 _currentHeight = 0;
             }
-            if (_currentDirection == Direction.down.ToString())
+            if (_currentDirection == Direction.down)
             {
                 foreach (var item in ltFloor)
                 {
-                    if (item.Number == _currentFloor)
+                    if (item.Number == _elevatorCurrentFloor)
                     {
                         _currentHeight = item.Height;
                     }

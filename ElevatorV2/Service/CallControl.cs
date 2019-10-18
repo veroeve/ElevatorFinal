@@ -10,7 +10,7 @@ namespace ElevatorV2.Service
     class CallControl : ICallControl
     {
         List<Request> _ltDownCall = new List<Request>();
-        List<Request> _ltUploadCall = new List<Request>();
+        List<Request> _toGoUpRequests = new List<Request>();
         List<Request> _ltOrderCabin = new List<Request>();
 
         public List<Request> LtDownCall
@@ -20,8 +20,8 @@ namespace ElevatorV2.Service
         }
         public List<Request> LtUploadCall
         {
-            get { return _ltUploadCall; }
-            set { value = _ltUploadCall; }
+            get { return _toGoUpRequests; }
+            set { value = _toGoUpRequests; }
         }
         public List<Request> LtOrderCabin
         {
@@ -30,132 +30,138 @@ namespace ElevatorV2.Service
         }
 
 
-        public void RegisterCall(int nextFloor, string direction)
+        public void RegisterRequest(int nameFloor, Direction typeRequest)
         {
-            if (direction == Direction.up.ToString())
+            if (typeRequest == Direction.up)
             {
-                _ltUploadCall.Add(new Request(nextFloor, direction));
-                _ltUploadCall.OrderBy(o => o.NumberFloor).ToList();
+                _toGoUpRequests.Add(new Request(nameFloor, typeRequest));
+                _toGoUpRequests.OrderBy(o => o.NumberFloor).ToList();
             }
-            if (direction == Direction.down.ToString())
+            else if (typeRequest == Direction.down)
             {
-                _ltDownCall.Add(new Request(nextFloor, direction));
+                _ltDownCall.Add(new Request(nameFloor, typeRequest));
                 _ltDownCall.OrderByDescending(o => o.NumberFloor).ToList();
             }
-            if (direction == string.Empty)
+            else if (typeRequest == Direction.none)
             {
-                _ltOrderCabin.Add(new Request(nextFloor, direction));
+                _ltOrderCabin.Add(new Request(nameFloor, typeRequest));
                 _ltOrderCabin.OrderBy(o => o.NumberFloor).ToList();
             }
         }
-        public bool CallIsFull()
+        public bool HasAnyRequest()
         {
             if (_ltDownCall.Count > 0)
             {
                 return true;
             }
-            else if (_ltUploadCall.Count > 0)
+            if (_toGoUpRequests.Count > 0)
             {
                 return true;
             }
-            else if (_ltOrderCabin.Count > 0)
+            if (_ltOrderCabin.Count > 0)
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
 
         // Do: Check if floor make a call to elevator
-        public bool FloorMakeCall(int currentFloor,string ElevatorDirection, ILevelSensor level)
+        public bool FloorMakeCall(int currentFloor, Direction elevatorDirection, ILevelSensor level)
         {
-            bool exist = false;
-            List<Request> _ltTemporal;
-            if (ElevatorDirection == Direction.up.ToString())
-            {
-                _ltTemporal = _ltUploadCall;
-            }
-            else
-            {
-                _ltTemporal = _ltDownCall;
-            }
-            foreach (var item in _ltTemporal)
-            {
-                exist = IsOnTheFloor(item.NumberFloor, currentFloor, ElevatorDirection);
-            }         
+            List<Request> _ltTemporal = GetRelatedRequestList(elevatorDirection);
+            bool exist = IsThereAnyCallForCurrentFloor(currentFloor, elevatorDirection, _ltTemporal);
 
             if (!exist)
             {
-                foreach (var item in _ltOrderCabin)
-                {
-                    exist = IsOnTheFloor(item.NumberFloor, currentFloor, string.Empty);
-                }
+                 exist = IsThereAnyCallForCurrentFloor(currentFloor, elevatorDirection, _ltOrderCabin);
             }
+
             if (exist)
             {
-                if (ElevatorDirection == Direction.up.ToString())
-                {
-                    RemoveUpCall(currentFloor);
-                }
-                if (ElevatorDirection == Direction.down.ToString())
-                {
-                    RemoveDownCall(currentFloor);
-                }
-                RemoveCall(currentFloor);
+                RemoveCallFromRequestLists(currentFloor, elevatorDirection);
                 level.Change(currentFloor.ToString());
             }
             return exist;
         }
-        public bool IsOnTheFloor(int numberFloor, int currentFloor,string direction)
+
+        private void RemoveCallFromRequestLists(int currentFloor, Direction elevatorDirection)
         {
-            bool exist = false;
-            if (numberFloor == currentFloor)
+            if (elevatorDirection == Direction.up)
             {
-               
-                exist = true;
+                RemoveUpCall(currentFloor);
+            }
+            else if (elevatorDirection == Direction.down)
+            {
+                RemoveDownCall(currentFloor);
+            }
+            RemoveCall(currentFloor);
+        }
+
+        private bool IsThereAnyCallForCurrentFloor(int currentFloor, Direction elevatorDirection, List<Request> _ltTemporal)
+        {
+            foreach (var item in _ltTemporal)
+            {
+                if (IsOnTheFloor(item.NumberFloor, currentFloor))
+                {
+                    return true;
+                }
             }
 
-            return exist;
+            return false;
+        }
+
+        private List<Request> GetRelatedRequestList(Direction elevatorDirection)
+        {
+            if (elevatorDirection == Direction.up)
+            {
+                return _toGoUpRequests;
+            }
+
+            return _ltDownCall;
+        }
+
+        public bool IsOnTheFloor(int numberFloor, int currentFloor)
+        {
+            return numberFloor == currentFloor;
         }
 
 
 
         // Do: Update and order lists of calls and update direction of elevator
-        public string UpdateCallAndDirection(string currentDirection, int currentFloor)
+        public Direction UpdateRequestAndDirection(Direction elevatorDirection, int currentFloor)
         {
-            if (currentDirection == Direction.up.ToString())
+            if (elevatorDirection == Direction.up)
             {
                 updateUpCall(currentFloor);
-                if (_ltUploadCall.Count == 0)
+                if (_toGoUpRequests.Count == 0)
                 {
-                    currentDirection = updateDirectionElevator(currentFloor, currentDirection);
+                    elevatorDirection = updateDirectionElevator(currentFloor, elevatorDirection);
                 }
 
 
             }
-            if (currentDirection == Direction.down.ToString())
+            if (elevatorDirection == Direction.down)
             {
                 updateDownCall(currentFloor);
                 if (_ltDownCall.Count == 0)
                 {
-                    currentDirection = updateDirectionElevator(currentFloor, currentDirection);
+                    elevatorDirection = updateDirectionElevator(currentFloor, elevatorDirection);
                 }
 
             }
 
-            return currentDirection;
+            return elevatorDirection;
         }
         public void updateUpCall(int currentFloor)
         {           
-            for (int i = 0; i < _ltUploadCall.Count; i++)
+            for (int i = 0; i < _toGoUpRequests.Count; i++)
             {
-                if (_ltUploadCall[i].NumberFloor < currentFloor)
+                if (_toGoUpRequests[i].NumberFloor < currentFloor)
                 {
-                    _ltDownCall.Add(_ltUploadCall[i]);
+                    _ltDownCall.Add(_toGoUpRequests[i]);
                     _ltDownCall.OrderByDescending(o => o.NumberFloor).ToList();
-                    _ltUploadCall.RemoveAt(i);
+                    _toGoUpRequests.RemoveAt(i);
                     i--;
                 }
 
@@ -167,43 +173,43 @@ namespace ElevatorV2.Service
             {
                 if (_ltDownCall[i].NumberFloor > currentFloor)
                 {
-                    _ltUploadCall.Add(_ltDownCall[i]);
-                    _ltUploadCall.OrderBy(o => o.NumberFloor).ToList();
+                    _toGoUpRequests.Add(_ltDownCall[i]);
+                    _toGoUpRequests.OrderBy(o => o.NumberFloor).ToList();
                     _ltDownCall.RemoveAt(i);
                     i--;
                 }
 
             }
         }
-        public string updateDirectionElevator(int currentFloor, string direction)
+        public Direction updateDirectionElevator(int currentFloor, Direction elevatorDirection)
         {
-            string updateDirection = direction;
+            Direction updateDirection = elevatorDirection;
 
             if (_ltOrderCabin.Count > 0)
             {
                 if (_ltOrderCabin.First().NumberFloor > currentFloor)
                 {
-                    updateDirection = Direction.up.ToString();
+                    updateDirection = Direction.up;
                 }
                 else
                 {
-                    updateDirection = Direction.down.ToString();
+                    updateDirection = Direction.down;
                 }
             }
             else
             {
-                if (direction == Direction.up.ToString())
+                if (elevatorDirection == Direction.up)
                 {
                     if (_ltDownCall.Count() > 0)
                     {
-                        updateDirection = Direction.down.ToString();
+                        updateDirection = Direction.down;
                     }
                 }
-                if (direction == Direction.down.ToString())
+                if (elevatorDirection == Direction.down)
                 {
-                    if (_ltUploadCall.Count() > 0)
+                    if (_toGoUpRequests.Count() > 0)
                     {
-                        updateDirection = Direction.up.ToString();
+                        updateDirection = Direction.up;
                     }
                 }
 
@@ -216,17 +222,19 @@ namespace ElevatorV2.Service
         // Do: Remove calls that was attendant
         public void RemoveUpCall(int currentFloor)
         {
-            for (int j = 0; j < _ltUploadCall.Count; j++)
+            for (int j = 0; j < _toGoUpRequests.Count; j++)
             {
-                if (_ltUploadCall[j].NumberFloor == currentFloor)
+                if (_toGoUpRequests[j].NumberFloor == currentFloor)
                 {
-                    _ltUploadCall.RemoveAt(j);
+                    _toGoUpRequests.RemoveAt(j);
                     j--;
                 }
             }
         }
         public void RemoveDownCall(int currentFloor)
         {
+            _ltDownCall.RemoveAll(r => r.NumberFloor == currentFloor);
+            /*
             for (int j = 0; j < _ltDownCall.Count; j++)
             {
                 if (_ltDownCall[j].NumberFloor == currentFloor)
@@ -234,7 +242,7 @@ namespace ElevatorV2.Service
                     _ltDownCall.RemoveAt(j);
                     j--;
                 }
-            }
+            }*/
         }
         public void RemoveCall(int currentFloor)
         {

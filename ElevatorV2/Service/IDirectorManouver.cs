@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ namespace ElevatorV2.Service
 {
     public interface IDirectorManouver
     {
-        void RegisterCall(int numberFloor, string typeRequest);
+        void RegisterCall(int numberFloor, Direction typeRequest);
         void ExecuteCalls(List<Floor> lisFloor);
     }
 }

@@ -27,7 +27,7 @@ namespace ElevatorV2
     {
         IElevator _elevator;
         ITimerSensor _timeSensor= new TimerSensor();
-        Dictionary<string, Button> _dictionaryFloorButton = new Dictionary<string, Button>();
+        Dictionary<Direction, Button> _dictionaryFloorButton = new Dictionary<Direction, Button>();
         Dictionary<string, Button> _dictionaryCabinButton = new Dictionary<string, Button>();
         public MainWindow()
         {
@@ -69,18 +69,18 @@ namespace ElevatorV2
             for (int i = 0; i < floorQuantity; i++)
             {
                 string key = "Floor" + i;
-                string type = TypeFloor.floorboth.ToString();
+                var type = TypeFloor.floorboth;
 
                 // Do: Fill combobox
                 cmbFloor.Items.Add(i);
                 // Do: Create virtual floors                
                 if (i==0)
                 {
-                    type = TypeFloor.floorup.ToString();
+                    type = TypeFloor.floorup;
                 }
                 if(i==floorQuantity-1)
                 {
-                    type = TypeFloor.floordown.ToString();
+                    type = TypeFloor.floordown;
                 }
                 if (ConfigurationSettings.AppSettings[key] != null)
                 {
@@ -90,8 +90,8 @@ namespace ElevatorV2
         }
         public void CreateFloorButton()
         {
-            _dictionaryFloorButton.Add(Direction.up.ToString(), btnUp);
-            _dictionaryFloorButton.Add(Direction.down.ToString(), btnDown);
+            _dictionaryFloorButton.Add(Direction.up, btnUp);
+            _dictionaryFloorButton.Add(Direction.down, btnDown);
         }
         public void CreateCabinButton()
         {
@@ -127,15 +127,16 @@ namespace ElevatorV2
                 return;
             }
 
+            var typeRequest = (Direction)Enum.Parse(typeof(Direction), buttonClicked.Tag.ToString());
             var numberFloor = (int)cmbFloor.SelectedValue;
-            _elevator.RegisterCall(numberFloor, buttonClicked.Tag.ToString());
+            _elevator.RegisterRequest(numberFloor, typeRequest);
         }
         private void btn0_Click(object sender, RoutedEventArgs e)
         {
             var buttonClicked = sender as Button;
             buttonClicked.Background = Brushes.Red;
             txtElevator.AppendText($"Floor request {buttonClicked.Tag.ToString()} \r\n");
-            _elevator.RegisterCall(int.Parse(buttonClicked.Tag.ToString()), string.Empty);
+            _elevator.RegisterRequest(int.Parse(buttonClicked.Tag.ToString()), Direction.none);
         }
 
     }

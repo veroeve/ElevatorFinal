@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,19 +10,19 @@ namespace ElevatorV2.Service
     class Request
     {
         int _numberFloor;
-        string _typeRequest;
+        Direction _typeRequest;
         public int NumberFloor
         {
             get { return _numberFloor; }
             set { value = _numberFloor; }
         }
-        public string TypeRequest
+        public Direction TypeRequest
         {
             get { return _typeRequest; }
             set { value = _typeRequest; }
         }
 
-        public Request(int numberFloor, string typeRequest)
+        public Request(int numberFloor, Direction typeRequest)
         {
             _numberFloor = numberFloor;
             _typeRequest = typeRequest;

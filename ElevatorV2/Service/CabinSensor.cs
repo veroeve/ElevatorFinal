@@ -9,21 +9,21 @@ namespace ElevatorV2.Service
 {
     class CabinSensor : ICabinSensor
     {      
-        public bool IsOnTheNextFloor(List<Floor> ltFloor, int currentFloor,int currentHeight, string ElevatorDirection)
+        public bool IsOnTheNextFloor(List<Floor> ltFloor, int currentFloor,int currentHeight, Direction elevatorDirection)
         {
             bool next = false;
             foreach (var item in ltFloor)
             {
                 if (item.Number == currentFloor)
                 {
-                    if (ElevatorDirection == Direction.up.ToString())
+                    if (elevatorDirection == Direction.up)
                     {
                         if (currentHeight >= item.Height)
                         {
                             next = true;
                         }
                     }
-                    if (ElevatorDirection == Direction.down.ToString())
+                    if (elevatorDirection == Direction.down)
                     {
                         if (currentHeight == 0)
                         {

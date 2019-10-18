@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace Services.Enums
 {
-    enum Direction
+    public enum Direction
     {
         up,
-        down
+        down,
+        none
     }
-    enum TypeFloor
+    public enum TypeFloor
     {
         floorup,
         floordown,

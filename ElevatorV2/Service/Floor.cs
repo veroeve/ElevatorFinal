@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,7 @@ namespace ElevatorV2.Service
     {
         int _number;
         int _height;
-        string _typeFloor;
+        TypeFloor _typeFloor;
         public int Number
         {
             get { return _number; }
@@ -21,13 +22,13 @@ namespace ElevatorV2.Service
             get { return _height; }
             set { value = _height; }
         }
-        public string TypeFloor
+        public TypeFloor TypeFloor
         {
             get { return _typeFloor; }
             set { value = _typeFloor; }
         }
 
-        public Floor(int number, int height,string typeFloor)
+        public Floor(int number=0, int height=0, TypeFloor typeFloor=TypeFloor.floorboth)
         {
             _number = number;
             _height = height;

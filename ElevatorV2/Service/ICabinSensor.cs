@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,6 @@ namespace ElevatorV2.Service
 {
     interface ICabinSensor
     {
-        bool IsOnTheNextFloor(List<Floor> ltFloor, int currentFloor, int currentHeight, string ElevatorDirection);
-
-
+        bool IsOnTheNextFloor(List<Floor> ltFloor, int currentFloor, int currentHeight, Direction elevatorDirection);
     }
 }

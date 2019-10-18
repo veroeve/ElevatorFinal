@@ -23,13 +23,10 @@ namespace ElevatorV2.Service
             set { value = _button; }
         }
 
-        public CabinButton(string name, Button button)
+        public CabinButton(string name="", Button button=null)
         {
             _button = button;
             _name = name;
-        }
-        public CabinButton()
-        {
         }
         public void ChangeColor(Button button)
         {

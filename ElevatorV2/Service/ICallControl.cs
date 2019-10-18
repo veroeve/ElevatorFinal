@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,10 @@ namespace ElevatorV2.Service
 {
     interface ICallControl
     {
-        void RegisterCall(int nextFloor, string direction);
-        bool CallIsFull();
-        bool FloorMakeCall(int currentFloor,string direction, ILevelSensor level);
-        string UpdateCallAndDirection(string currentDirection, int currentFloor);
-
-
+        void RegisterRequest(int nameFloor, Direction typeRequest);
+        bool HasAnyRequest();
+        bool FloorMakeCall(int currentFloor, Direction elevatorDirection, ILevelSensor level);
+        Direction UpdateRequestAndDirection(Direction elevatorDirection, int currentFloor);
+        
     }
 }
